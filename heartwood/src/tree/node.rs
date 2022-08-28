@@ -9,13 +9,10 @@ pub trait Write<T> {
 pub struct Node<'a, R> {
     subscribers: Vec<Box<&'a dyn Write<R>>>,
     value: R,
+    updated: bool
 }
 
 impl<'a, R> Node<'a, R> {
-    pub fn set_value(mut self, value: R) {
-        self.value = value;
-    }
-
     pub fn sub(mut self, subscriber: &'a dyn Write<R>) {
         let s = Box::new(subscriber);
         self.subscribers.push(s);
