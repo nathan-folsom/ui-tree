@@ -31,8 +31,12 @@ mod test {
     #[test]
     fn should_create_derived() {
         let provider_tree = ProviderTree::new();
-        let root_node = RootNode::new(25, &provider_tree);
-        //        let derived_node = DerivedNode::new(|| root_node.get(), |v: i32| {});
+        let mut root_node = RootNode::new(25, &provider_tree);
+        let read = || root_node.get();
+        let write = |v: i32| {
+            root_node.set(v);
+        };
+        let derived_node = DerivedNode::new(read, write, &provider_tree);
     }
 
     #[test]

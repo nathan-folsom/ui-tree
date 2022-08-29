@@ -32,7 +32,7 @@ impl<'a, T: Clone> Read<'a, T> for RootNode<'a, T> {
 
         let value: &T = &self.values.get(provider).unwrap().current;
 
-        &value
+        value
     }
 }
 
