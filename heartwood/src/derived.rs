@@ -30,3 +30,9 @@ impl<'a, T, U> Read<'a, T> for DerivedNode<'a, T, U> {
         self.provider.get_value(&provider)
     }
 }
+
+impl<'a, T, U> Write<U> for DerivedNode<'a, T, U> {
+    fn set(&self, value: U) {
+        (self.write)(value);
+    }
+}

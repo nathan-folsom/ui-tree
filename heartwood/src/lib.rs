@@ -42,7 +42,19 @@ mod test {
     }
 
     #[test]
-    fn should_get_derived() {
-        // let provider_tree = ProviderTree::new();
+    fn should_set_derived() {
+        let provider_tree = ProviderTree::new();
+        let root_node = RootNode::new(&|| 25, &provider_tree);
+
+        let read = || *root_node.get() * 2;
+        let write = |v: i32| {
+            root_node.set(v / 2);
+        };
+        let derived_node = DerivedNode::new(&read, &write, &provider_tree);
+
+        derived_node.set(60);
+
+        assert_eq!(*root_node.get(), 30);
+        assert_eq!(*derived_node.get(), 60);
     }
 }
