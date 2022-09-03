@@ -74,4 +74,14 @@ impl<'a, T> DataProvider<'a, T> {
         }
         return Rc::clone(&self.values.borrow().get(provider).unwrap().current);
     }
+    pub fn set_value(&self, provider: &'a ProviderNode, value: T) {
+        let initialized = { self.values.borrow().contains_key(provider) };
+
+        if initialized {
+            self.values.borrow_mut().get_mut(provider).unwrap().current = Rc::new(value);
+        } else {
+            let new_value = ProvidedValue::new(value);
+            self.values.borrow_mut().insert(provider, new_value);
+        }
+    }
 }

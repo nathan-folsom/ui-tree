@@ -35,11 +35,6 @@ impl<'a, T: Clone> Write<T> for RootNode<'a, T> {
     fn set(&self, value: T) {
         let provider: &ProviderNode = self.provider_tree.get_current();
 
-        if !self.values.borrow().contains_key(provider) {
-            let new_value = ProvidedValue::new(value);
-            self.values.borrow_mut().insert(provider, new_value);
-        } else {
-            self.values.borrow_mut().get_mut(provider).unwrap().current = value;
-        }
+        self.provider.set_value(provider, value);
     }
 }
