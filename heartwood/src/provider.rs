@@ -4,8 +4,8 @@ pub struct ProviderTree<'a> {
     root: ProviderNode<'a>,
 }
 
-impl ProviderTree<'static> {
-    pub fn new() -> ProviderTree<'static> {
+impl<'a> ProviderTree<'a> {
+    pub fn new() -> ProviderTree<'a> {
         ProviderTree {
             root: ProviderNode {
                 scope: None,
@@ -48,13 +48,13 @@ pub trait Dependent {}
 
 pub struct DataProvider<'a, T> {
     values: ValueProvider<'a, T>,
-    init_value: Box<dyn Fn() -> ProvidedValue<T>>,
+    init_value: &'a dyn Fn() -> T,
 }
 
 type ValueProvider<'a, T> = RefCell<HashMap<&'a ProviderNode<'a>, ProvidedValue<T>>>;
 
 impl<'a, T> DataProvider<'a, T> {
-    pub fn new(init_value: Box<dyn Fn() -> ProvidedValue<T>>) -> DataProvider<'a, T> {
+    pub fn new(init_value: &'a dyn Fn() -> T) -> DataProvider<'a, T> {
         DataProvider {
             values: RefCell::new(HashMap::new()),
             init_value,
@@ -68,7 +68,7 @@ impl<'a, T> DataProvider<'a, T> {
         }
 
         {
-            let new_value = (self.init_value)();
+            let new_value = ProvidedValue::new((self.init_value)());
             let mut values = self.values.borrow_mut();
             values.insert(provider, new_value);
         }

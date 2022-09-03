@@ -1,49 +1,32 @@
-use std::cell::RefCell;
-use std::collections::HashMap;
-use std::marker::PhantomData;
+use std::rc::Rc;
 
 use crate::common::*;
 use crate::provider::*;
 
-pub struct DerivedNode<'a, T, U, R: FnMut() -> T, W: FnMut(U)> {
-    read: R,
-    write: W,
-    pub key: NodeKey,
-    pub values: RefCell<HashMap<&'a ProviderNode<'a>, ProvidedValue<T>>>,
+pub struct DerivedNode<'a, T, U> {
+    write: &'a dyn Fn(U),
     provider_tree: &'a ProviderTree<'a>,
-    _t: PhantomData<(T, U)>,
+    provider: DataProvider<'a, T>,
 }
 
-impl<T, U, R: FnMut() -> T, W: FnMut(U)> DerivedNode<'_, T, U, R, W> {
+impl<'a, T, U> DerivedNode<'a, T, U> {
     pub fn new(
-        read: R,
-        write: W,
-        provider_tree: &'static ProviderTree,
-    ) -> DerivedNode<'static, T, U, R, W> {
+        read: &'a dyn Fn() -> T,
+        write: &'a dyn Fn(U),
+        provider_tree: &'a ProviderTree,
+    ) -> DerivedNode<'a, T, U> {
         DerivedNode {
-            read,
             write,
-            key: NodeKey {},
             provider_tree,
-            values: RefCell::new(HashMap::new()),
-            _t: Default::default(),
+            provider: DataProvider::new(read),
         }
     }
 }
 
-impl<T, U, R: FnMut() -> T, W: FnMut(U)> Keyed for DerivedNode<'_, T, U, R, W> {}
-
-impl<'a, T, U, R: FnMut() -> T, W: FnMut(U)> Read<'a, T> for DerivedNode<'a, T, U, R, W> {
-    fn get(&'a self) -> &'a T {
+impl<'a, T, U> Read<'a, T> for DerivedNode<'a, T, U> {
+    fn get(&'a self) -> Rc<T> {
         let provider = self.provider_tree.get_current();
 
-        if !self.values.borrow().contains_key(provider) {
-            let new_value = ProvidedValue::new((self.read)());
-            self.values.borrow_mut().insert(provider, new_value);
-        }
-
-        let current_value: &T = &self.values.borrow().get(provider).unwrap().current;
-
-        current_value
+        self.provider.get_value(&provider)
     }
 }
