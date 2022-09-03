@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 #[derive(Hash, Eq, PartialEq, Debug)]
 pub struct NodeKey;
 
@@ -8,9 +10,9 @@ pub trait Keyed {
 pub trait Dependent {}
 
 pub trait Read<'a, T> {
-    fn get(&'a mut self) -> &'a T;
+    fn get(&'a self) -> Rc<T>;
 }
 
 pub trait Write<T> {
-    fn set(&mut self, value: T);
+    fn set(&self, value: T);
 }
