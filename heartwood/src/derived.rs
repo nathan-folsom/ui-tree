@@ -14,8 +14,8 @@ impl<'a, T, U> DerivedNode<'a, T, U> {
         read: &'a dyn Fn() -> T,
         write: &'a dyn Fn(U),
         provider_tree: &'a ProviderTree,
-    ) -> DerivedNode<'a, T, U> {
-        DerivedNode {
+    ) -> Self {
+        Self {
             write,
             provider_tree,
             provider: DataProvider::new(read),

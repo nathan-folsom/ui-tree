@@ -7,8 +7,8 @@ pub struct RootNode<'a, T: Clone> {
 }
 
 impl<'a, T: Clone + 'static> RootNode<'a, T> {
-    pub fn new(init: &'a dyn Fn() -> T, provider_tree: &'a ProviderTree) -> RootNode<'a, T> {
-        RootNode {
+    pub fn new(init: &'a dyn Fn() -> T, provider_tree: &'a ProviderTree) -> Self {
+        Self {
             provider_tree,
             provider: DataProvider::new(init),
         }

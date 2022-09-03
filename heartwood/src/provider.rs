@@ -54,8 +54,8 @@ pub struct DataProvider<'a, T> {
 type ValueProvider<'a, T> = RefCell<HashMap<&'a ProviderNode<'a>, ProvidedValue<T>>>;
 
 impl<'a, T> DataProvider<'a, T> {
-    pub fn new(init_value: &'a dyn Fn() -> T) -> DataProvider<'a, T> {
-        DataProvider {
+    pub fn new(init_value: &'a dyn Fn() -> T) -> Self {
+        Self {
             values: RefCell::new(HashMap::new()),
             init_value,
         }

@@ -43,6 +43,6 @@ mod test {
 
     #[test]
     fn should_get_derived() {
-        let provider_tree = ProviderTree::new();
+        // let provider_tree = ProviderTree::new();
     }
 }
