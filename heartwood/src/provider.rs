@@ -106,4 +106,15 @@ impl<'a, T> DataProvider<'a, T> {
             .borrow_mut()
             .push(dependent);
     }
+
+    pub fn notify_dependents(&self, provider: &'a ProviderNode) {
+        self.values
+            .borrow()
+            .get(provider)
+            .unwrap()
+            .dependents
+            .borrow()
+            .iter()
+            .for_each(|d| d.destroy());
+    }
 }

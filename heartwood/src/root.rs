@@ -35,5 +35,7 @@ impl<'a, T: Clone> Write<T> for RootNode<'a, T> {
         let provider: &ProviderNode = self.provider_tree.get_current();
 
         self.provider.set_value(provider, value);
+
+        self.provider.notify_dependents(provider);
     }
 }
