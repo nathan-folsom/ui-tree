@@ -25,14 +25,17 @@ impl<'a, T, U> DerivedNode<'a, T, U> {
 
 impl<'a, T, U> Read<'a, T> for DerivedNode<'a, T, U> {
     fn get(&'a self) -> Rc<T> {
-        let mut stack = self.provider_tree.call_stack.borrow_mut();
+        {
+            self.provider_tree.call_stack.borrow_mut().push(self);
+        }
 
-        stack.push(self);
         let provider = self.provider_tree.get_current();
 
         let value = self.provider.get_value(&provider);
 
-        stack.pop();
+        {
+            self.provider_tree.call_stack.borrow_mut().pop();
+        }
 
         value
     }
