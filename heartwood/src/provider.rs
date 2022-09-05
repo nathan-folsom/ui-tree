@@ -1,5 +1,5 @@
 use crate::common::Dependent;
-use std::{cell::RefCell, collections::HashMap, rc::Rc};
+use std::{cell::RefCell, collections::HashMap, fmt::Display, rc::Rc};
 
 pub struct ProviderTree<'a> {
     root: ProviderNode<'a>,
@@ -54,14 +54,14 @@ impl<'a, T> ProvidedValue<'a, T> {
     }
 }
 
-pub struct DataProvider<'a, T> {
+pub struct DataProvider<'a, T: Display> {
     values: ValueProvider<'a, T>,
     init_value: &'a dyn Fn() -> T,
 }
 
 type ValueProvider<'a, T> = RefCell<HashMap<&'a ProviderNode<'a>, ProvidedValue<'a, T>>>;
 
-impl<'a, T> DataProvider<'a, T> {
+impl<'a, T: Display> DataProvider<'a, T> {
     pub fn new(init_value: &'a dyn Fn() -> T) -> Self {
         Self {
             values: RefCell::new(HashMap::new()),
@@ -77,6 +77,7 @@ impl<'a, T> DataProvider<'a, T> {
 
         {
             let new_value = ProvidedValue::new((self.init_value)());
+            println!("Initializing value: {}", new_value.current);
             let mut values = self.values.borrow_mut();
             values.insert(provider, new_value);
         }
@@ -94,6 +95,7 @@ impl<'a, T> DataProvider<'a, T> {
     }
 
     pub fn delete(&self, provider: &'a ProviderNode) {
+        self.notify_dependents(provider);
         self.values.borrow_mut().remove_entry(provider);
     }
 
@@ -116,5 +118,12 @@ impl<'a, T> DataProvider<'a, T> {
             .borrow()
             .iter()
             .for_each(|d| d.destroy());
+        self.values
+            .borrow()
+            .get(provider)
+            .unwrap()
+            .dependents
+            .borrow_mut()
+            .drain(0..);
     }
 }

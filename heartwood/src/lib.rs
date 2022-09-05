@@ -5,6 +5,8 @@ mod root;
 
 #[cfg(test)]
 mod test {
+    use std::fmt::Display;
+
     use crate::common::*;
     use crate::derived::*;
     use crate::provider::*;
@@ -36,7 +38,7 @@ mod test {
         let write = |v: i32| {
             root_node.set(v);
         };
-        let derived_node = DerivedNode::new(&read, &write, &provider_tree);
+        let derived_node = DerivedNode::new(&read, &write, &provider_tree, "derived");
 
         assert_eq!(*derived_node.get(), 50);
     }
@@ -49,7 +51,7 @@ mod test {
         let write = |v: i32| {
             root_node.set(v / 2);
         };
-        let derived_node = DerivedNode::new(&read, &write, &provider_tree);
+        let derived_node = DerivedNode::new(&read, &write, &provider_tree, "derived");
 
         derived_node.set(60);
 
@@ -64,7 +66,7 @@ mod test {
 
         let read = || *root_node.get() * 2;
         let write = |_v: i32| {};
-        let derived_node = DerivedNode::new(&read, &write, &provider_tree);
+        let derived_node = DerivedNode::new(&read, &write, &provider_tree, "derived");
 
         assert_eq!(*derived_node.get(), 50);
 
@@ -77,7 +79,89 @@ mod test {
 
     impl Dependent for TestDependent {
         fn destroy(&self) {
-            println!("Destroying outdated dependent value");
+            println!("update reached test dependent");
         }
+    }
+
+    impl Display for TestDependent {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            write!(f, "{}", "test dependent")
+        }
+    }
+
+    #[test]
+    fn should_get_derived_chain() {
+        let tree = ProviderTree::new(Some(&TestDependent {}));
+        let root = RootNode::new(&|| 25, &tree);
+
+        let read1 = || *root.get() * 2;
+        let write1 = |v: i32| root.set(v / 2);
+        let derived1 = DerivedNode::new(&read1, &write1, &tree, "derived1");
+
+        let read2 = || *derived1.get() / 2;
+        let write2 = |v: i32| derived1.set(v * 2);
+        let derived2 = DerivedNode::new(&read2, &write2, &tree, "derived2");
+
+        assert_eq!(*derived2.get(), 25);
+    }
+
+    #[test]
+    fn should_propagate_from_root_to_chained_derived() {
+        let tree = ProviderTree::new(Some(&TestDependent {}));
+        let root = RootNode::new(&|| 25, &tree);
+
+        let read1 = || *root.get() * 2;
+        let write1 = |v: i32| root.set(v / 2);
+        let derived1 = DerivedNode::new(&read1, &write1, &tree, "derived1");
+
+        let read2 = || *derived1.get() / 2;
+        let write2 = |v: i32| derived1.set(v * 2);
+        let derived2 = DerivedNode::new(&read2, &write2, &tree, "derived2");
+
+        root.set(30);
+
+        assert_eq!(*derived2.get(), 30);
+    }
+
+    #[test]
+    fn should_propagate_changes_to_chained_derived() {
+        let tree = ProviderTree::new(Some(&TestDependent {}));
+        let root = RootNode::new(&|| 25, &tree);
+
+        let read1 = || *root.get() * 2;
+        let write1 = |v: i32| root.set(v / 2);
+        let derived1 = DerivedNode::new(&read1, &write1, &tree, "derived1");
+
+        let read2 = || *derived1.get() / 2;
+        let write2 = |v: i32| derived1.set(v * 2);
+        let derived2 = DerivedNode::new(&read2, &write2, &tree, "derived2");
+        derived2.set(40);
+
+        assert_eq!(*derived2.get(), 40);
+    }
+
+    #[test]
+    fn should_set_initialized_root_from_derived() {
+        let tree = ProviderTree::new(Some(&TestDependent {}));
+        let root = RootNode::new(&|| 25, &tree);
+
+        let read1 = || *root.get() * 2;
+        let write1 = |v: i32| root.set(v / 2);
+        let derived1 = DerivedNode::new(&read1, &write1, &tree, "derived1");
+
+        let read2 = || *derived1.get() / 2;
+        let write2 = |v: i32| derived1.set(v * 2);
+        let derived2 = DerivedNode::new(&read2, &write2, &tree, "derived2");
+
+        println!("Get derived 2");
+        derived2.get();
+
+        println!("Set root");
+        root.set(30);
+
+        println!("Set derived2");
+        derived2.set(40);
+
+        assert_eq!(*derived2.get(), 40);
     }
 }

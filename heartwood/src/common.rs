@@ -1,6 +1,6 @@
-use std::rc::Rc;
+use std::{fmt::Display, rc::Rc};
 
-pub trait Dependent {
+pub trait Dependent: Display {
     fn destroy(&self);
 }
 
