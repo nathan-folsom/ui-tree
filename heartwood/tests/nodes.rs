@@ -1,5 +1,6 @@
-use std::fmt::Display;
+mod common;
 
+use crate::common::TestDependent;
 use heartwood::{common::*, derived::*, provider::*, root::*};
 
 #[test]
@@ -63,18 +64,6 @@ fn should_update_derived_when_root_updates() {
     root_node.set(60);
 
     assert_eq!(*derived_node.get(), 120);
-}
-
-struct TestDependent {}
-
-impl Dependent for TestDependent {
-    fn destroy(&self) {}
-}
-
-impl Display for TestDependent {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", "test dependent")
-    }
 }
 
 #[test]

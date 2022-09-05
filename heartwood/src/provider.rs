@@ -1,6 +1,8 @@
 use crate::common::Dependent;
 use std::{cell::RefCell, collections::HashMap, fmt::Display, rc::Rc};
 
+pub const GLOBAL_SCOPE: Scope = Scope();
+
 pub struct ProviderTree<'a> {
     root: ProviderNode<'a>,
     pub call_stack: RefCell<Vec<&'a dyn Dependent>>,
@@ -19,7 +21,7 @@ impl<'a> ProviderTree<'a> {
 
         ProviderTree {
             root: ProviderNode {
-                scope: None,
+                scope: GLOBAL_SCOPE,
                 parent: None,
             },
             call_stack: RefCell::new(call_stack),
@@ -33,7 +35,7 @@ impl<'a> ProviderTree<'a> {
 
 #[derive(Hash, PartialEq, Eq)]
 pub struct ProviderNode<'a> {
-    scope: Option<Scope>,
+    scope: Scope,
     parent: Option<Box<&'a ProviderNode<'a>>>,
 }
 
