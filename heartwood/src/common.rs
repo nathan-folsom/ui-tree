@@ -1,6 +1,8 @@
 use std::rc::Rc;
 
-pub trait Dependent {}
+pub trait Dependent {
+    fn destroy(&self);
+}
 
 pub trait Read<'a, T> {
     fn get(&'a self) -> Rc<T>;

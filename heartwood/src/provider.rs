@@ -1,7 +1,9 @@
+use crate::common::Dependent;
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 pub struct ProviderTree<'a> {
     root: ProviderNode<'a>,
+    pub call_stack: RefCell<Vec<&'a dyn Dependent>>,
 }
 
 impl<'a> ProviderTree<'a> {
@@ -11,7 +13,12 @@ impl<'a> ProviderTree<'a> {
                 scope: None,
                 parent: None,
             },
+            call_stack: RefCell::new(Vec::new()),
         }
+    }
+
+    pub fn get_current(&self) -> &ProviderNode {
+        &self.root
     }
 }
 
@@ -21,37 +28,29 @@ pub struct ProviderNode<'a> {
     parent: Option<Box<&'a ProviderNode<'a>>>,
 }
 
-impl ProviderTree<'_> {
-    pub fn get_current(&self) -> &ProviderNode {
-        &self.root
-    }
-}
-
 #[derive(Hash, PartialEq, Eq)]
 pub struct Scope();
 
-pub struct ProvidedValue<T> {
+pub struct ProvidedValue<'a, T> {
     pub current: Rc<T>,
-    pub dependents: Vec<Box<dyn Dependent>>,
+    pub dependents: RefCell<Vec<&'a dyn Dependent>>,
 }
 
-impl<T> ProvidedValue<T> {
-    pub fn new(initial_value: T) -> ProvidedValue<T> {
+impl<'a, T> ProvidedValue<'a, T> {
+    pub fn new(initial_value: T) -> ProvidedValue<'a, T> {
         ProvidedValue {
             current: Rc::new(initial_value),
-            dependents: Vec::new(),
+            dependents: RefCell::new(Vec::new()),
         }
     }
 }
-
-pub trait Dependent {}
 
 pub struct DataProvider<'a, T> {
     values: ValueProvider<'a, T>,
     init_value: &'a dyn Fn() -> T,
 }
 
-type ValueProvider<'a, T> = RefCell<HashMap<&'a ProviderNode<'a>, ProvidedValue<T>>>;
+type ValueProvider<'a, T> = RefCell<HashMap<&'a ProviderNode<'a>, ProvidedValue<'a, T>>>;
 
 impl<'a, T> DataProvider<'a, T> {
     pub fn new(init_value: &'a dyn Fn() -> T) -> Self {
@@ -83,5 +82,19 @@ impl<'a, T> DataProvider<'a, T> {
             let new_value = ProvidedValue::new(value);
             self.values.borrow_mut().insert(provider, new_value);
         }
+    }
+
+    pub fn delete(&self, provider: &'a ProviderNode) {
+        self.values.borrow_mut().remove_entry(provider);
+    }
+
+    pub fn attach_dependent(&self, provider: &'a ProviderNode, dependent: &'a dyn Dependent) {
+        self.values
+            .borrow()
+            .get(provider)
+            .unwrap()
+            .dependents
+            .borrow_mut()
+            .push(dependent);
     }
 }

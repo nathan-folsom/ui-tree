@@ -7,7 +7,7 @@ pub struct RootNode<'a, T: Clone> {
 }
 
 impl<'a, T: Clone + 'static> RootNode<'a, T> {
-    pub fn new(init: &'a dyn Fn() -> T, provider_tree: &'a ProviderTree) -> Self {
+    pub fn new(init: &'a dyn Fn() -> T, provider_tree: &'a ProviderTree<'a>) -> Self {
         Self {
             provider_tree,
             provider: DataProvider::new(init),
@@ -18,8 +18,11 @@ impl<'a, T: Clone + 'static> RootNode<'a, T> {
 impl<'a, T: Clone + 'a> Read<'a, T> for RootNode<'a, T> {
     fn get(&'a self) -> std::rc::Rc<T> {
         let provider: &ProviderNode = self.provider_tree.get_current();
+        let caller = self.provider_tree.call_stack.borrow().last().unwrap();
 
-        self.provider.get_value(provider)
+        let value = self.provider.get_value(provider);
+
+        value
     }
 }
 
