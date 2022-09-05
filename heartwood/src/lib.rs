@@ -1,5 +1,6 @@
 mod common;
 mod derived;
+mod logger;
 mod provider;
 mod root;
 
@@ -78,9 +79,7 @@ mod test {
     struct TestDependent {}
 
     impl Dependent for TestDependent {
-        fn destroy(&self) {
-            println!("update reached test dependent");
-        }
+        fn destroy(&self) {}
     }
 
     impl Display for TestDependent {
@@ -153,13 +152,10 @@ mod test {
         let write2 = |v: i32| derived1.set(v * 2);
         let derived2 = DerivedNode::new(&read2, &write2, &tree, "derived2");
 
-        println!("Get derived 2");
         derived2.get();
 
-        println!("Set root");
         root.set(30);
 
-        println!("Set derived2");
         derived2.set(40);
 
         assert_eq!(*derived2.get(), 40);
