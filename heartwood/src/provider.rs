@@ -7,13 +7,22 @@ pub struct ProviderTree<'a> {
 }
 
 impl<'a> ProviderTree<'a> {
-    pub fn new() -> ProviderTree<'a> {
+    /// Supplying an initial_dependent allows reading node values at arbitrary places in your code.
+    /// This can be helpful for testing, but the value will not be reactive and could become
+    /// stale
+    pub fn new(initial_dependent: Option<&'a dyn Dependent>) -> ProviderTree<'a> {
+        let call_stack = if let Some(i) = initial_dependent {
+            vec![i]
+        } else {
+            vec![]
+        };
+
         ProviderTree {
             root: ProviderNode {
                 scope: None,
                 parent: None,
             },
-            call_stack: RefCell::new(Vec::new()),
+            call_stack: RefCell::new(call_stack),
         }
     }
 

@@ -18,9 +18,13 @@ impl<'a, T: Clone + 'static> RootNode<'a, T> {
 impl<'a, T: Clone + 'a> Read<'a, T> for RootNode<'a, T> {
     fn get(&'a self) -> std::rc::Rc<T> {
         let provider: &ProviderNode = self.provider_tree.get_current();
-        let caller = self.provider_tree.call_stack.borrow().last().unwrap();
 
         let value = self.provider.get_value(provider);
+
+        self.provider.attach_dependent(
+            provider,
+            *self.provider_tree.call_stack.borrow().last().unwrap(),
+        );
 
         value
     }

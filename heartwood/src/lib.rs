@@ -12,7 +12,7 @@ mod test {
 
     #[test]
     fn should_create_root<'a>() {
-        let provider_tree = ProviderTree::new();
+        let provider_tree = ProviderTree::new(Some(&TestDependent {}));
         let root_node = RootNode::new(&|| 15, &provider_tree);
 
         assert_eq!(*root_node.get(), 15);
@@ -20,7 +20,7 @@ mod test {
 
     #[test]
     fn should_set_root() {
-        let provider_tree = ProviderTree::new();
+        let provider_tree = ProviderTree::new(Some(&TestDependent {}));
         let root_node = RootNode::new(&|| 15, &provider_tree);
 
         root_node.set(25);
@@ -30,7 +30,7 @@ mod test {
 
     #[test]
     fn should_create_derived() {
-        let provider_tree = ProviderTree::new();
+        let provider_tree = ProviderTree::new(Some(&TestDependent {}));
         let root_node = RootNode::new(&|| 25, &provider_tree);
         let read = || *root_node.get() * 2;
         let write = |v: i32| {
@@ -43,7 +43,7 @@ mod test {
 
     #[test]
     fn should_get_derived() {
-        let provider_tree = ProviderTree::new();
+        let provider_tree = ProviderTree::new(Some(&TestDependent {}));
         let root_node = RootNode::new(&|| 25, &provider_tree);
         let read = || *root_node.get() * 2;
         let write = |v: i32| {
@@ -59,7 +59,7 @@ mod test {
 
     #[test]
     fn should_update_derived_when_root_updates() {
-        let provider_tree = ProviderTree::new();
+        let provider_tree = ProviderTree::new(Some(&TestDependent {}));
         let root_node = RootNode::new(&|| 25, &provider_tree);
 
         let read = || *root_node.get() * 2;
@@ -71,5 +71,13 @@ mod test {
         root_node.set(60);
 
         assert_eq!(*derived_node.get(), 120);
+    }
+
+    struct TestDependent {}
+
+    impl Dependent for TestDependent {
+        fn destroy(&self) {
+            println!("Destroying outdated dependent value");
+        }
     }
 }
