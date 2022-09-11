@@ -25,17 +25,14 @@ impl<'a, T: Display, U> DerivedNode<'a, T, U> {
             debug_name: String::from(debug_name),
         }
     }
-}
 
-impl<'a, T: Display, U> Read<'a, T> for DerivedNode<'a, T, U> {
-    fn get(&'a self) -> Rc<T> {
-        let provider = self.provider_tree.get_current();
-
+    pub fn read(&'a self) -> Rc<T> {
         {
             self.provider_tree.call_stack.borrow_mut().push(self);
         }
 
-        let value = self.provider.get_value(&provider);
+        let provider = self.provider_tree.get_current();
+        let value = self.provider.get_value(provider.clone());
 
         let index = self.provider_tree.call_stack.borrow().len() - 2;
         println!(
@@ -44,7 +41,7 @@ impl<'a, T: Display, U> Read<'a, T> for DerivedNode<'a, T, U> {
             self.provider_tree.call_stack.borrow().get(index).unwrap()
         );
         self.provider.attach_dependent(
-            provider,
+            provider.clone(),
             *self.provider_tree.call_stack.borrow().get(index).unwrap(),
         );
 
@@ -54,12 +51,48 @@ impl<'a, T: Display, U> Read<'a, T> for DerivedNode<'a, T, U> {
 
         value
     }
+
+    fn write(&self, value: U) {
+        println!("set {}", self);
+        (self.write)(value);
+    }
+}
+
+impl<'a, T: Display, U> Read<'a, T> for DerivedNode<'a, T, U> {
+    fn get(&'a self) -> Rc<T> {
+        self.read()
+    }
+
+    fn getp(&'a self, scope: &'static Scope) -> Rc<T> {
+        {
+            self.provider_tree.scope_stack.borrow_mut().push(scope);
+        }
+
+        let value = self.read();
+
+        {
+            self.provider_tree.scope_stack.borrow_mut().pop();
+        }
+
+        value
+    }
 }
 
 impl<'a, T: Display, U> Write<U> for DerivedNode<'a, T, U> {
     fn set(&self, value: U) {
-        println!("set {}", self);
-        (self.write)(value);
+        self.write(value);
+    }
+
+    fn setp(&self, value: U, scope: &'static Scope) {
+        {
+            self.provider_tree.scope_stack.borrow_mut().push(scope);
+        }
+
+        self.write(value);
+
+        {
+            self.provider_tree.scope_stack.borrow_mut().pop();
+        }
     }
 }
 
