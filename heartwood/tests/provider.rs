@@ -57,3 +57,14 @@ fn should_get_and_set_derived_in_scoped_provider() {
     assert_eq!(*local_provided, 25);
     assert_eq!(*global_provided, 30);
 }
+
+#[test]
+#[should_panic]
+fn should_panic_when_trying_to_access_scope_that_is_not_parent() {
+    let tree = ProviderTree::new(Some(&TestDependent {}));
+    let root = RootNode::new(&|| 25, &tree);
+
+    const LOCAL_SCOPE: Scope = Scope::new("Root Scoped Local Scope");
+
+    root.getp(&LOCAL_SCOPE);
+}
