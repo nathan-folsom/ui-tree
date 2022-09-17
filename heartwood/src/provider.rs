@@ -27,7 +27,7 @@ impl<'a> ProviderTree<'a> {
         };
 
         let root = Rc::new(ProviderNode {
-            scope: GLOBAL_SCOPE,
+            scope: &GLOBAL_SCOPE,
             parent: None,
         });
 
@@ -50,9 +50,13 @@ impl<'a> ProviderTree<'a> {
     pub fn get_current(&self) -> Rc<ProviderNode> {
         let mut current = self.get_base();
         let scope = &**self.scope_stack.borrow().last().unwrap();
+        println!(
+            "Getting current node, scope is '{:?}', working scope is '{:?}'",
+            current.scope, scope
+        );
 
         loop {
-            if current.scope == *scope {
+            if current.scope == scope {
                 break;
             }
 
@@ -69,13 +73,14 @@ impl<'a> ProviderTree<'a> {
     }
 
     pub fn set_current(&self, provider_node: Rc<ProviderNode>) {
-        *self.current.borrow_mut() = Some(provider_node);
+        self.scope_stack.borrow_mut().push(provider_node.scope);
+        *self.current.borrow_mut() = Some(provider_node.clone());
     }
 }
 
 #[derive(Hash, PartialEq, Eq)]
 pub struct ProviderNode {
-    pub scope: Scope,
+    pub scope: &'static Scope,
     pub parent: Option<Rc<ProviderNode>>,
 }
 
