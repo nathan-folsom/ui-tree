@@ -1,7 +1,12 @@
 use crate::common::Dependent;
-use std::{cell::RefCell, collections::HashMap, fmt::Display, rc::Rc};
+use std::{
+    cell::RefCell,
+    collections::HashMap,
+    fmt::{Debug, Display},
+    rc::Rc,
+};
 
-pub const GLOBAL_SCOPE: Scope = Scope();
+pub const GLOBAL_SCOPE: Scope = Scope::new("Global Scope");
 
 pub struct ProviderTree<'a> {
     pub root: Rc<ProviderNode>,
@@ -62,6 +67,10 @@ impl<'a> ProviderTree<'a> {
 
         return current;
     }
+
+    pub fn set_current(&self, provider_node: Rc<ProviderNode>) {
+        *self.current.borrow_mut() = Some(provider_node);
+    }
 }
 
 #[derive(Hash, PartialEq, Eq)]
@@ -71,8 +80,21 @@ pub struct ProviderNode {
 }
 
 #[derive(Hash, PartialEq, Eq)]
-pub struct Scope();
+pub struct Scope {
+    debug_name: &'static str,
+}
 
+impl Scope {
+    pub const fn new(debug_name: &'static str) -> Self {
+        Self { debug_name }
+    }
+}
+
+impl Debug for Scope {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Scope: {}", self.debug_name)
+    }
+}
 pub struct ProvidedValue<'a, T> {
     pub current: Rc<T>,
     pub dependents: RefCell<Vec<&'a dyn Dependent>>,
