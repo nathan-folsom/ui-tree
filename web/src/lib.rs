@@ -1,6 +1,8 @@
 mod utils;
 
+use heartwood::provider::Scope;
 use wasm_bindgen::prelude::*;
+use web_sys::console::log_1;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
@@ -9,11 +11,8 @@ use wasm_bindgen::prelude::*;
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 #[wasm_bindgen]
-extern {
-    fn alert(s: &str);
-}
-
-#[wasm_bindgen]
-pub fn greet() {
-    alert("Hello, web!");
+pub fn init_tree() {
+    const SCOPEY_DOPE: Scope = Scope::new("Web Example Scope");
+    let dbg = JsValue::from_str(&format!("{SCOPEY_DOPE:?}"));
+    log_1(&dbg);
 }
