@@ -13,7 +13,7 @@ use heartwood::{
 #[test]
 fn should_get_and_set_root_in_scoped_provider() {
     let tree = ProviderTree::new(Some(&TestDependent {}));
-    let root = RootNode::new(&|| 25, &tree);
+    let root = RootNode::new(&|| 25, &tree, "Test Root");
 
     const LOCAL_SCOPE: Scope = Scope::new("Root Scoped Local Scope");
     let node = ProviderNode {
@@ -35,7 +35,7 @@ fn should_get_and_set_root_in_scoped_provider() {
 #[test]
 fn should_get_and_set_derived_in_scoped_provider() {
     let tree = ProviderTree::new(Some(&TestDependent {}));
-    let root = RootNode::new(&|| 25, &tree);
+    let root = RootNode::new(&|| 25, &tree, "Test Root");
     const LOCAL_SCOPE: Scope = Scope::new("Derived Scoped Local Scope");
     let node = ProviderNode {
         scope: &LOCAL_SCOPE,
@@ -62,7 +62,7 @@ fn should_get_and_set_derived_in_scoped_provider() {
 #[should_panic]
 fn should_panic_when_trying_to_access_scope_that_is_not_parent() {
     let tree = ProviderTree::new(Some(&TestDependent {}));
-    let root = RootNode::new(&|| 25, &tree);
+    let root = RootNode::new(&|| 25, &tree, "Test Root");
 
     const LOCAL_SCOPE: Scope = Scope::new("Root Scoped Local Scope");
 

@@ -1,19 +1,26 @@
 use std::fmt::Display;
 use std::rc::Rc;
 
+use crate::accessor::Accessible;
 use crate::common::{Read, Write};
 use crate::provider::*;
 
 pub struct RootNode<'a, T: Clone + Display> {
     provider: DataProvider<'a, T>,
     provider_tree: &'a ProviderTree<'a>,
+    debug_name: &'static str,
 }
 
 impl<'a, T: Clone + Display> RootNode<'a, T> {
-    pub fn new(init: &'a dyn Fn() -> T, provider_tree: &'a ProviderTree<'a>) -> Self {
+    pub fn new(
+        init: &'a dyn Fn() -> T,
+        provider_tree: &'a ProviderTree<'a>,
+        debug_name: &'static str,
+    ) -> Self {
         Self {
             provider_tree,
             provider: DataProvider::new(init),
+            debug_name,
         }
     }
 
@@ -80,3 +87,11 @@ impl<'a, T: Clone + Display> Write<T> for RootNode<'a, T> {
         }
     }
 }
+
+impl<T: Display + Clone> Display for RootNode<'_, T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.debug_name)
+    }
+}
+
+impl<'a, T: Clone + Display + 'static> Accessible<'a, T> for RootNode<'a, T> {}
