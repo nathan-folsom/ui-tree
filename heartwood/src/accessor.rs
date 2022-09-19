@@ -2,7 +2,7 @@ use std::{fmt::Display, rc::Rc};
 
 use crate::{
     common::{Dependent, Read},
-    provider::ProviderTree,
+    provider::Provided,
 };
 
 pub struct Accessor<'a, T> {
@@ -10,15 +10,25 @@ pub struct Accessor<'a, T> {
     source: &'a dyn Accessible<'a, T>,
 }
 
-pub trait Accessible<'a, T>: Read<'a, T> + Display {}
+pub trait Accessible<'a, T>: Read<'a, T> + Display + Provided<'a> {}
 
-impl<'a, T> Accessor<'a, T> {
+impl<'a, T: Display> Accessor<'a, T> {
     pub fn new(source: &'a dyn Accessible<'a, T>, on_change: &'a dyn Fn(Rc<T>)) -> Self {
         Self { on_change, source }
     }
 
-    pub fn current(&self) -> Rc<T> {
-        self.source.get()
+    pub fn current(&'a self) -> Rc<T> {
+        {
+            self.source.get_tree().call_stack.borrow_mut().push(self)
+        }
+
+        let val = self.source.get();
+
+        {
+            self.source.get_tree().call_stack.borrow_mut().pop();
+        }
+
+        val
     }
 }
 

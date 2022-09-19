@@ -109,3 +109,9 @@ impl<'a, T: Display, U> Display for DerivedNode<'a, T, U> {
         write!(f, "{}", self.debug_name)
     }
 }
+
+impl<'a, T: Display, U> Provided<'a> for DerivedNode<'a, T, U> {
+    fn get_tree(&'a self) -> &'a ProviderTree {
+        self.provider_tree
+    }
+}

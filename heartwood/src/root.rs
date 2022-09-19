@@ -95,3 +95,9 @@ impl<T: Display + Clone> Display for RootNode<'_, T> {
 }
 
 impl<'a, T: Clone + Display + 'static> Accessible<'a, T> for RootNode<'a, T> {}
+
+impl<'a, T: Display + Clone> Provided<'a> for RootNode<'a, T> {
+    fn get_tree(&self) -> &'a ProviderTree {
+        self.provider_tree
+    }
+}

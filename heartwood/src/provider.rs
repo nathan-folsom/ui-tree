@@ -187,3 +187,7 @@ impl<'a, T: Display> DataProvider<'a, T> {
             .drain(0..);
     }
 }
+
+pub trait Provided<'a> {
+    fn get_tree(&self) -> &'a ProviderTree;
+}
