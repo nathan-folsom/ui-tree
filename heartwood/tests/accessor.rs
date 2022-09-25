@@ -3,12 +3,7 @@ mod common;
 use std::{cell::RefCell, rc::Rc};
 
 use crate::common::TestDependent;
-use heartwood::{
-    accessor::Accessor,
-    common::{Read, Write},
-    provider::{ProviderNode, ProviderTree, Scope, GLOBAL_SCOPE},
-    root::*,
-};
+use heartwood::{accessor::Accessor, common::Write, provider::ProviderTree, root::*};
 
 #[test]
 fn should_access_current_value() {
