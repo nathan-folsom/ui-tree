@@ -39,7 +39,10 @@ fn should_call_callback_on_change() {
         count: RefCell::new(0),
     };
     {
-        let on_change = |v: Rc<i32>| counter.increment();
+        let on_change = |v: Rc<i32>| {
+            counter.increment();
+            println!("Accessor on_change called with: {v}");
+        };
         let accessor = Accessor::new(&root, &on_change);
 
         accessor.current(); // We have to access before setting to create dependency accessor ->
