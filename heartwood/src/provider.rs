@@ -154,11 +154,6 @@ impl<'a, T: Display> DataProvider<'a, T> {
         }
     }
 
-    pub fn delete(&self, provider: Rc<ProviderNode>) {
-        self.notify_dependents(provider.clone());
-        self.values.borrow_mut().remove_entry(&provider);
-    }
-
     pub fn attach_dependent(&self, provider: Rc<ProviderNode>, dependent: &'a dyn Dependent) {
         self.values
             .borrow()
@@ -169,21 +164,17 @@ impl<'a, T: Display> DataProvider<'a, T> {
             .push(dependent);
     }
 
+    pub fn delete(&self, provider: Rc<ProviderNode>) {
+        self.notify_dependents(provider.clone());
+        self.values.borrow_mut().remove_entry(&provider);
+    }
+
     pub fn notify_dependents(&self, provider: Rc<ProviderNode>) {
         let values = &self.values;
         let values_ref = values.borrow();
         let current_node = values_ref.get(&provider).unwrap();
 
-        let mut local_deps = vec![];
-
-        {
-            let current_dependents = current_node.dependents.borrow_mut();
-            let mut current_dependents_iter = current_dependents.iter();
-
-            while let Some(v) = current_dependents_iter.next() {
-                local_deps.push(*v);
-            }
-        };
+        let local_deps = self.clone_dependents(provider);
 
         let mut dependents_iter = local_deps.into_iter();
 
@@ -192,6 +183,25 @@ impl<'a, T: Display> DataProvider<'a, T> {
         }
 
         *current_node.dependents.borrow_mut() = vec![];
+    }
+
+    fn clone_dependents(&self, provider: Rc<ProviderNode>) -> Vec<&dyn Dependent> {
+        let values = &self.values;
+        let values_ref = values.borrow();
+        let value = values_ref.get(&provider).unwrap();
+
+        let mut local_deps = vec![];
+
+        {
+            let current_dependents = value.dependents.borrow_mut();
+            let mut current_dependents_iter = current_dependents.iter();
+
+            while let Some(v) = current_dependents_iter.next() {
+                local_deps.push(*v);
+            }
+        };
+
+        local_deps
     }
 }
 
