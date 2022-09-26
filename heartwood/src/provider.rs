@@ -165,8 +165,15 @@ impl<'a, T: Display> DataProvider<'a, T> {
     }
 
     pub fn delete(&self, provider: Rc<ProviderNode>) {
-        self.notify_dependents(provider.clone());
+        let dependents = self.clone_dependents(provider.clone());
+
         self.values.borrow_mut().remove_entry(&provider);
+
+        let mut dependents_iter = dependents.into_iter();
+
+        while let Some(d) = dependents_iter.next() {
+            d.nudge();
+        }
     }
 
     pub fn notify_dependents(&self, provider: Rc<ProviderNode>) {
