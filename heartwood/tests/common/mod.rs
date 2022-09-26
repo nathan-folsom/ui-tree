@@ -5,7 +5,7 @@ use heartwood::common::Dependent;
 pub struct TestDependent {}
 
 impl Dependent for TestDependent {
-    fn destroy(&self) {}
+    fn nudge(&self) {}
 }
 
 impl Display for TestDependent {

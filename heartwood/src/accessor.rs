@@ -39,7 +39,7 @@ impl<T> Display for Accessor<'_, T> {
 }
 
 impl<'a, T: Display> Dependent for Accessor<'a, T> {
-    fn destroy(&self) {
+    fn nudge(&self) {
         let next = self.source.get();
         println!(
             "Accessor for {} detected change, next value: {}",

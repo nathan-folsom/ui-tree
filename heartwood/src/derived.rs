@@ -97,7 +97,7 @@ impl<'a, T: Display, U> Write<U> for DerivedNode<'a, T, U> {
 }
 
 impl<'a, T: Display, U> Dependent for DerivedNode<'a, T, U> {
-    fn destroy(&self) {
+    fn nudge(&self) {
         let provider = self.provider_tree.get_current();
 
         self.provider.delete(provider);

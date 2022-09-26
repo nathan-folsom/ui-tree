@@ -188,7 +188,7 @@ impl<'a, T: Display> DataProvider<'a, T> {
         let mut dependents_iter = local_deps.into_iter();
 
         while let Some(d) = dependents_iter.next() {
-            d.destroy();
+            d.nudge();
         }
 
         *current_node.dependents.borrow_mut() = vec![];

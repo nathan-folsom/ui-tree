@@ -3,7 +3,9 @@ use std::{fmt::Display, rc::Rc};
 use crate::provider::Scope;
 
 pub trait Dependent: Display {
-    fn destroy(&self);
+    /// This method is called when the value that the implementor is dependent on has changed. It
+    /// is up to the implementor to decide how to react to this.
+    fn nudge(&self);
 }
 
 pub trait Read<'a, T> {
