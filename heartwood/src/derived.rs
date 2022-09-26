@@ -1,6 +1,7 @@
 use std::fmt::Display;
 use std::rc::Rc;
 
+use crate::accessor::Accessible;
 use crate::common::*;
 use crate::provider::*;
 
@@ -115,3 +116,5 @@ impl<'a, T: Display, U> Provided<'a> for DerivedNode<'a, T, U> {
         self.provider_tree
     }
 }
+
+impl<'a, T: Display, U> Accessible<'a, T> for DerivedNode<'a, T, U> {}
