@@ -170,21 +170,28 @@ impl<'a, T: Display> DataProvider<'a, T> {
     }
 
     pub fn notify_dependents(&self, provider: Rc<ProviderNode>) {
-        self.values
-            .borrow()
-            .get(&provider)
-            .unwrap()
-            .dependents
-            .borrow()
-            .iter()
-            .for_each(|d| d.destroy());
-        self.values
-            .borrow()
-            .get(&provider)
-            .unwrap()
-            .dependents
-            .borrow_mut()
-            .drain(0..);
+        let values = &self.values;
+        let values_ref = values.borrow();
+        let current_node = values_ref.get(&provider).unwrap();
+
+        let mut local_deps = vec![];
+
+        {
+            let current_dependents = current_node.dependents.borrow_mut();
+            let mut current_dependents_iter = current_dependents.iter();
+
+            while let Some(v) = current_dependents_iter.next() {
+                local_deps.push(*v);
+            }
+        };
+
+        let mut dependents_iter = local_deps.into_iter();
+
+        while let Some(d) = dependents_iter.next() {
+            d.destroy();
+        }
+
+        *current_node.dependents.borrow_mut() = vec![];
     }
 }
 
