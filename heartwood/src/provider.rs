@@ -100,6 +100,7 @@ impl Debug for Scope {
         write!(f, "Scope: {}", self.debug_name)
     }
 }
+
 pub struct ProvidedValue<'a, T> {
     pub current: Rc<T>,
     pub dependents: RefCell<Vec<&'a dyn Dependent>>,
@@ -128,6 +129,7 @@ impl<'a, T: Display> DataProvider<'a, T> {
             init_value,
         }
     }
+
     pub fn get_value(&self, provider: Rc<ProviderNode>) -> Rc<T> {
         let initialized = { self.values.borrow().contains_key(&provider.clone()) };
 
@@ -143,6 +145,7 @@ impl<'a, T: Display> DataProvider<'a, T> {
         }
         return Rc::clone(&self.values.borrow().get(&provider.clone()).unwrap().current);
     }
+
     pub fn set_value(&self, provider: Rc<ProviderNode>, value: T) {
         let initialized = { self.values.borrow().contains_key(&provider) };
 
