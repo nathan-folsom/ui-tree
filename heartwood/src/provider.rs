@@ -169,11 +169,7 @@ impl<'a, T: Display> DataProvider<'a, T> {
 
         self.values.borrow_mut().remove_entry(&provider);
 
-        let mut dependents_iter = dependents.into_iter();
-
-        while let Some(d) = dependents_iter.next() {
-            d.nudge();
-        }
+        Self::nudge_dependents(dependents);
     }
 
     pub fn notify_dependents(&self, provider: Rc<ProviderNode>) {
@@ -183,13 +179,17 @@ impl<'a, T: Display> DataProvider<'a, T> {
 
         let local_deps = self.clone_dependents(provider);
 
-        let mut dependents_iter = local_deps.into_iter();
+        Self::nudge_dependents(local_deps);
+
+        *current_node.dependents.borrow_mut() = vec![];
+    }
+
+    fn nudge_dependents(dependents: Vec<&dyn Dependent>) {
+        let mut dependents_iter = dependents.into_iter();
 
         while let Some(d) = dependents_iter.next() {
             d.nudge();
         }
-
-        *current_node.dependents.borrow_mut() = vec![];
     }
 
     fn clone_dependents(&self, provider: Rc<ProviderNode>) -> Vec<&dyn Dependent> {
