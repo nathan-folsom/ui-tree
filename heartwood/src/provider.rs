@@ -129,7 +129,7 @@ impl<'a, T: Display> DataProvider<'a, T> {
         }
     }
     pub fn get_value(&self, provider: Rc<ProviderNode>) -> Rc<T> {
-        let initialized = { self.values.borrow().contains_key(&*provider.clone()) };
+        let initialized = { self.values.borrow().contains_key(&provider.clone()) };
 
         if initialized {
             return Rc::clone(&self.values.borrow().get(&provider).unwrap().current);
@@ -157,7 +157,7 @@ impl<'a, T: Display> DataProvider<'a, T> {
     pub fn attach_dependent(&self, provider: Rc<ProviderNode>, dependent: &'a dyn Dependent) {
         self.values
             .borrow()
-            .get(&*provider)
+            .get(&provider)
             .unwrap()
             .dependents
             .borrow_mut()
