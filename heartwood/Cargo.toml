@@ -1,6 +1,6 @@
 [package]
 name = "heartwood"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "An experimental cross-platform UI state management framework inspired by React libraries such as Jotai/Recoil"
 license = "MIT"
