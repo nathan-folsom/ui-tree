@@ -1,6 +1,5 @@
 use std::{fmt::Display, rc::Rc};
-
-use crate::provider::Scope;
+use crate::v2::provider_tree::Scope;
 
 pub trait Dependent: Display {
     /// This method is called when the value that the implementor is dependent on has changed. It
