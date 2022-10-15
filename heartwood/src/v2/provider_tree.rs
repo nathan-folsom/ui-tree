@@ -32,6 +32,18 @@ impl<T> ProviderStack<T> {
             stack: RefCell::new(Vec::new())
         }
     }
+
+    pub fn act(&self, value: T, callback: fn()) {
+        {
+            self.stack.borrow_mut().push(value);
+        }
+
+        callback();
+
+        {
+            self.stack.borrow_mut().pop();
+        }
+    }
 }
 
 pub struct ProviderNode {
@@ -54,4 +66,8 @@ pub trait Dependent {
     fn nudge(&self) {
 
     }
+}
+
+pub trait Provided {
+    fn get_tree(&self) -> &ProviderTree;
 }

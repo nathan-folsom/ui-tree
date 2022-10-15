@@ -47,15 +47,12 @@ impl<T: 'static> RootNode<T> {
 }
 impl<T: 'static> Read<T> for RootNode<T> {
     fn getp(&self, scope: &'static Scope) -> Rc<T> {
-        {
-            self.provider_tree.scope_stack.borrow_mut().push(scope);
-        }
+        let mut value: Rc<T> = Rc::new(());
+        let get_value = || { value = self.read(); };
 
-        let value = self.read();
+        self.provider_tree.scope_stack.act(scope, get_value);
 
-        {
-            self.provider_tree.scope_stack.borrow_mut().pop();
-        }
+        if value { }
 
         value
     }
@@ -71,15 +68,9 @@ impl<T> Write<T> for RootNode<T> {
     }
 
     fn setp(&self, value: T, scope: &'static Scope) {
-        {
-            self.provider_tree.scope_stack.borrow_mut().push(scope);
-        }
+        let write_value= || { self.write(value) };
 
-        self.write(value);
-
-        {
-            self.provider_tree.scope_stack.borrow_mut().pop();
-        }
+        self.provider_tree.scope_stack.act(scope, write_value);
     }
 }
 
