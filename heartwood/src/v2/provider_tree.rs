@@ -77,16 +77,18 @@ impl<T> ProviderStack<T> {
         }
     }
 
-    pub fn act(&self, value: T, callback: fn()) {
+    pub fn act<U>(&self, value: T, callback: &dyn FnOnce() -> U) -> U{
         {
             self.stack.borrow_mut().push(value);
         }
 
-        callback();
+        let value = callback();
 
         {
             self.stack.borrow_mut().pop();
         }
+
+        value
     }
 }
 

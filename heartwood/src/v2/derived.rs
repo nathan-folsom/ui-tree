@@ -65,12 +65,9 @@ impl<T: Debug, U> Read<T> for DerivedNode<T, U> {
     }
 
     fn getp(&self, scope: &'static Scope) -> Rc<T> {
-        let mut value: Rc<T> = Rc::new(());
-        let get_value = || { value = self.read(); };
+        let get_value = || { self.read() };
 
-        self.provider_tree.scope_stack.act(scope, get_value);
-
-        value
+        self.provider_tree.scope_stack.act(scope, &get_value)
     }
 }
 
@@ -82,7 +79,7 @@ impl<T: Debug, U> Write<U> for DerivedNode<T, U> {
     fn setp(&self, value: U, scope: &'static Scope) {
         let write_value = || { self.write(value) };
 
-        self.provider_tree.scope_stack.act(scope, write_value);
+        self.provider_tree.scope_stack.act(scope, &write_value);
     }
 }
 
