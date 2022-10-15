@@ -25,12 +25,12 @@ impl<T: 'static> RootNode<T> {
         let value = self.provider.get_value(provider.clone());
 
         println!(
-            "Adding dependent to root: {}",
-            self.provider_tree.call_stack.borrow().last().unwrap()
+            "Adding dependent to root: {:?}",
+            self.provider_tree.dependent_stack.stack.borrow().last().unwrap()
         );
         self.provider.attach_dependent(
             provider,
-            *self.provider_tree.call_stack.borrow().last().unwrap(),
+            *self.provider_tree.dependent_stack.stack.borrow().last().unwrap(),
         );
 
         value
