@@ -1,14 +1,15 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::fmt::Debug;
 use std::rc::Rc;
 use crate::v2::provider_tree::{Dependent, ProviderNode};
 
-pub struct DataProvider<T: 'static> {
+pub struct DataProvider<T: Debug + 'static> {
     values: RefCell<Option<HashMap<&'static ProviderNode, ProvidedValue<T>>>>,
     init_value: &'static dyn Fn() -> T,
 }
 
-impl<T> DataProvider<T> {
+impl<T: Debug> DataProvider<T> {
     pub const fn new(init_value: &'static dyn Fn() -> T) -> Self {
         Self {
             values: RefCell::new(None),
@@ -30,7 +31,7 @@ impl<T> DataProvider<T> {
 
         {
             let new_value = ProvidedValue::new((self.init_value)());
-            println!("Initializing value: {}", new_value.current);
+            println!("Initializing value: {:?}", new_value.current);
             let mut values = self.values.borrow_mut().expect(DataProvider::EXPECT_INIT);
             values.expect(DataProvider::EXPECT_INIT).insert(provider, new_value);
         }
@@ -107,7 +108,16 @@ impl<T> DataProvider<T> {
     }
 }
 
-pub struct ProvidedValue<T> {
+pub struct ProvidedValue<T: Debug> {
     pub current: T,
     pub dependents: RefCell<Vec<&'static dyn Dependent>>,
+}
+
+impl<T: Debug> ProvidedValue<T> {
+    pub fn new(value: T) -> Self {
+        Self {
+            current: value,
+            dependents: RefCell::new(Vec::new())
+        }
+    }
 }

@@ -5,13 +5,13 @@ use crate::v2::accessor::Accessible;
 use crate::v2::data_provider::DataProvider;
 use crate::v2::provider_tree::{Provided, ProviderTree, Scope};
 
-pub struct RootNode<T: 'static> {
+pub struct RootNode<T: Debug + 'static> {
     provider: DataProvider<T>,
     provider_tree: &'static ProviderTree,
     debug_name: &'static str,
 }
 
-impl<T: 'static> RootNode<T> {
+impl<T: Debug + 'static> RootNode<T> {
     pub const fn new(init: &'static dyn Fn() -> T, provider_tree: &'static ProviderTree, debug_name: &'static str) -> Self {
         Self {
             provider_tree,
@@ -45,7 +45,8 @@ impl<T: 'static> RootNode<T> {
         self.provider.notify_dependents(provider.clone());
     }
 }
-impl<T: 'static> Read<T> for RootNode<T> {
+
+impl<T: Debug + 'static> Read<T> for RootNode<T> {
     fn getp(&self, scope: &'static Scope) -> Rc<T> {
         let get_value = || { self.read() };
 
@@ -57,7 +58,7 @@ impl<T: 'static> Read<T> for RootNode<T> {
     }
 }
 
-impl<T> Write<T> for RootNode<T> {
+impl<T: Debug> Write<T> for RootNode<T> {
     fn set(&self, value: T) {
         self.write(value);
     }
@@ -69,15 +70,15 @@ impl<T> Write<T> for RootNode<T> {
     }
 }
 
-impl<T> Debug for RootNode<T> {
+impl<T: Debug> Debug for RootNode<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.debug_name)
     }
 }
 
-impl<T: 'static> Accessible<T> for RootNode<T> {}
+impl<T: Debug + 'static> Accessible<T> for RootNode<T> {}
 
-impl<T> Provided for RootNode<T> {
+impl<T: Debug> Provided for RootNode<T> {
     fn get_tree(&self) -> &'static ProviderTree {
         self.provider_tree
     }
