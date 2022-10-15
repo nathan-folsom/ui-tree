@@ -1,8 +1,19 @@
 use std::cell::RefCell;
+use std::fmt::{Debug, Formatter};
+use std::rc::Rc;
+use std::thread::scope;
 
-pub struct Scope();
+#[derive(Hash, PartialEq, Eq)]
+pub struct Scope(&'static str);
 
-pub const GLOBAL_SCOPE: Scope = Scope();
+impl Debug for Scope {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let Scope(debug_name) = self;
+        write!(f, "{}", debug_name)
+    }
+}
+
+pub const GLOBAL_SCOPE: Scope = Scope("Global Scope");
 
 pub struct ProviderTree {
     pub root: ProviderNode,
@@ -20,10 +31,44 @@ impl ProviderTree {
             node_stack: ProviderStack::new(),
         }
     }
+
+    fn get_base(&self) -> &ProviderNode {
+        self.node_stack.stack.borrow().last().expect("Tried to get current node, but no node was found in stack")
+    }
+
+    pub fn get_current(&self) -> &ProviderNode {
+        let mut current = self.get_base();
+        let scope = &**self.scope_stack.stack.borrow().last().unwrap();
+        println!(
+            "Getting current node, scope is '{:?}', working scope is '{:?}'",
+            current.scope, scope
+        );
+
+        loop {
+            if current.scope == scope {
+                break;
+            }
+
+            let parent = &current.parent;
+
+            if let Some(p) = parent {
+                current = p.clone();
+            } else {
+                panic!("Tried to access a value in a scope that is not an ancestor of the current provider node");
+            }
+        }
+
+        return current;
+    }
+
+    pub fn set_current(&self, provider_node: Rc<ProviderNode>) {
+        self.scope_stack.stack.borrow_mut().push(provider_node.scope);
+        *self.current.borrow_mut() = Some(provider_node.clone());
+    }
 }
 
 pub struct ProviderStack<T> {
-    stack: RefCell<Vec<T>>,
+    pub stack: RefCell<Vec<T>>,
 }
 
 impl<T> ProviderStack<T> {
@@ -46,6 +91,7 @@ impl<T> ProviderStack<T> {
     }
 }
 
+#[derive(Hash, PartialEq, Eq)]
 pub struct ProviderNode {
     scope: &'static Scope,
     parent: Option<&'static ProviderNode>,
