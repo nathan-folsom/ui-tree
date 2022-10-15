@@ -53,18 +53,18 @@ impl<T: Debug + 'static, U: 'static> DerivedNode<T, U> {
         value
     }
 
-    fn write(&self, value: U) {
+    fn write(&'static self, value: U) {
         println!("set {:?}", self);
         (self.write)(value);
     }
 }
 
 impl<T: Debug, U> Read<T> for DerivedNode<T, U> {
-    fn get(&self) -> Rc<T> {
+    fn get(&'static self) -> Rc<T> {
         self.read()
     }
 
-    fn getp(&self, scope: &'static Scope) -> Rc<T> {
+    fn getp(&'static self, scope: &'static Scope) -> Rc<T> {
         let get_value = || { self.read() };
 
         self.provider_tree.scope_stack.act(scope, &get_value)
@@ -72,11 +72,11 @@ impl<T: Debug, U> Read<T> for DerivedNode<T, U> {
 }
 
 impl<T: Debug, U> Write<U> for DerivedNode<T, U> {
-    fn set(&self, value: U) {
+    fn set(&'static self, value: U) {
         self.write(value);
     }
 
-    fn setp(&self, value: U, scope: &'static Scope) {
+    fn setp(&'static self, value: U, scope: &'static Scope) {
         let write_value = || { self.write(value) };
 
         self.provider_tree.scope_stack.act(scope, &write_value);
@@ -84,7 +84,7 @@ impl<T: Debug, U> Write<U> for DerivedNode<T, U> {
 }
 
 impl<T: Debug, U> Dependent for DerivedNode<T, U> {
-    fn nudge(&self) {
+    fn nudge(&'static self) {
         let provider = self.provider_tree.get_current();
 
         self.provider.delete(provider);
@@ -92,13 +92,13 @@ impl<T: Debug, U> Dependent for DerivedNode<T, U> {
 }
 
 impl<T: Debug, U> Debug for DerivedNode<T, U> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&'static self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.debug_name)
     }
 }
 
 impl<T: Debug, U> Provided for DerivedNode<T, U> {
-    fn get_tree(&self) -> &ProviderTree {
+    fn get_tree(&'static self) -> &ProviderTree {
         self.provider_tree
     }
 }

@@ -17,7 +17,7 @@ impl<T: Debug> Accessor<T> {
         Self { on_change, source }
     }
 
-    pub fn current(&self) -> Rc<T> {
+    pub fn current(&'static self) -> Rc<T> {
         let get_val = || { self.source.get() };
 
         self.source.get_tree().dependent_stack.act(self, &get_val)
