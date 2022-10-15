@@ -77,7 +77,7 @@ impl<T> ProviderStack<T> {
         }
     }
 
-    pub fn act<U>(&self, value: T, callback: &dyn FnOnce() -> U) -> U{
+    pub fn act<U>(&self, value: T, callback: &dyn FnOnce() -> U) -> U {
         {
             self.stack.borrow_mut().push(value);
         }
@@ -109,10 +109,8 @@ impl ProviderNode {
     }
 }
 
-pub trait Dependent {
-    fn nudge(&self) {
-
-    }
+pub trait Dependent: Debug {
+    fn nudge(&self) {}
 }
 
 pub trait Provided {
