@@ -1,7 +1,6 @@
 use std::cell::RefCell;
 use std::fmt::{Debug, Formatter};
 use std::rc::Rc;
-use std::thread::scope;
 
 #[derive(Hash, PartialEq, Eq)]
 pub struct Scope(&'static str);

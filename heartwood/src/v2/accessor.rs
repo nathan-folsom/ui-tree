@@ -3,7 +3,7 @@ use std::rc::Rc;
 use crate::common::Read;
 use crate::v2::provider_tree::{Dependent, Provided};
 
-pub struct Accessor<T> {
+pub struct Accessor<T: 'static> {
     pub on_change: &'static dyn Fn(Rc<T>),
     source: &'static dyn AccessorSource<T>,
 }
