@@ -5,14 +5,14 @@ use crate::v2::accessor::Accessible;
 use crate::v2::data_provider::DataProvider;
 use crate::v2::provider_tree::{Dependent, Provided, ProviderTree, Scope};
 
-pub struct DerivedNode<T: 'static, U: 'static> {
+pub struct DerivedNode<T: Debug + 'static, U: 'static> {
     write: &'static dyn Fn(U),
     provider_tree: &'static ProviderTree,
     provider: DataProvider<T>,
     debug_name: &'static str,
 }
 
-impl<T: 'static, U: 'static> DerivedNode<T, U> {
+impl<T: Debug + 'static, U: 'static> DerivedNode<T, U> {
     pub fn new(
         read: &'static dyn Fn() -> T,
         write: &'static dyn Fn(U),
@@ -27,27 +27,27 @@ impl<T: 'static, U: 'static> DerivedNode<T, U> {
         }
     }
 
-    pub fn read(&self) -> Rc<T> {
+    pub fn read(&'static self) -> Rc<T> {
         {
-            self.provider_tree.call_stack.borrow_mut().push(self);
+            self.provider_tree.dependent_stack.stack.borrow_mut().push(self);
         }
 
         let provider = self.provider_tree.get_current();
         let value = self.provider.get_value(provider.clone());
 
-        let index = self.provider_tree.call_stack.borrow().len() - 2;
+        let index = self.provider_tree.dependent_stack.stack.borrow().len() - 2;
         println!(
-            "{:?} adding dependent: {}",
+            "{:?} adding dependent: {:?}",
             self,
-            self.provider_tree.call_stack.borrow().get(index).unwrap()
+            self.provider_tree.dependent_stack.stack.borrow().get(index).unwrap()
         );
         self.provider.attach_dependent(
             provider.clone(),
-            *self.provider_tree.call_stack.borrow().get(index).unwrap(),
+            *self.provider_tree.dependent_stack.stack.borrow().get(index).unwrap(),
         );
 
         {
-            self.provider_tree.call_stack.borrow_mut().pop();
+            self.provider_tree.dependent_stack.stack.borrow_mut().pop();
         }
 
         value
@@ -91,7 +91,7 @@ impl<T: Debug, U> Dependent for DerivedNode<T, U> {
     }
 }
 
-impl<T, U> Debug for DerivedNode<T, U> {
+impl<T: Debug, U> Debug for DerivedNode<T, U> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.debug_name)
     }
