@@ -5,8 +5,10 @@ use crate::v2::provider_tree::{Dependent, Provided};
 
 pub struct Accessor<T> {
     pub on_change: &'static dyn Fn(Rc<T>),
-    source: &'static dyn Accessible<T> + Debug,
+    source: &'static dyn AccessorSource<T>,
 }
+
+trait AccessorSource<T>: Accessible<T> + Debug {}
 
 pub trait Accessible<T>: Read<T> + Provided {}
 
