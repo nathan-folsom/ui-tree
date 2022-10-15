@@ -6,14 +6,14 @@ use crate::common::TestDependent;
 use heartwood::{
     accessor::Accessor,
     common::{Read, Write},
-    derived::DerivedNode,
-    provider::ProviderTree,
-    root::*,
 };
+use heartwood::v2::derived::DerivedNode;
+use heartwood::v2::provider_tree::ProviderTree;
+use heartwood::v2::root::RootNode;
 
 #[test]
 fn should_access_current_value() {
-    let tree = ProviderTree::new(Some(&TestDependent {}));
+    let tree = ProviderTree::new();
     let root = RootNode::new(&|| 25, &tree, "Test Root Node");
 
     let on_change = |_v: Rc<i32>| {};
@@ -24,7 +24,7 @@ fn should_access_current_value() {
 
 #[test]
 fn should_call_callback_on_change() {
-    let tree = ProviderTree::new(Some(&TestDependent {}));
+    let tree = ProviderTree::new();
     let root = RootNode::new(&|| 25, &tree, "Test Root Node");
 
     let counter = Count {
@@ -50,7 +50,7 @@ fn should_call_callback_on_change() {
 
 #[test]
 fn should_access_derived_value() {
-    let tree = ProviderTree::new(Some(&TestDependent {}));
+    let tree = ProviderTree::new();
     let root = RootNode::new(&|| 25, &tree, "Test Root Node");
     let read = || *root.get();
     let write = |v: i32| root.set(v);

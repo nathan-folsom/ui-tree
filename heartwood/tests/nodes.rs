@@ -1,11 +1,14 @@
 mod common;
 
 use crate::common::TestDependent;
-use heartwood::{common::*, derived::*, provider::*, root::*};
+use heartwood::v2::root::RootNode;
+use heartwood::{common::*};
+use heartwood::v2::derived::DerivedNode;
+use heartwood::v2::provider_tree::ProviderTree;
 
 #[test]
 fn should_create_root<'a>() {
-    let provider_tree = ProviderTree::new(Some(&TestDependent {}));
+    let provider_tree = ProviderTree::new();
     let root_node = RootNode::new(&|| 15, &provider_tree, "Test Root");
 
     assert_eq!(*root_node.get(), 15);
@@ -13,7 +16,7 @@ fn should_create_root<'a>() {
 
 #[test]
 fn should_set_root() {
-    let provider_tree = ProviderTree::new(Some(&TestDependent {}));
+    let provider_tree = ProviderTree::new();
     let root_node = RootNode::new(&|| 15, &provider_tree, "Test Root");
 
     root_node.set(25);
@@ -23,7 +26,7 @@ fn should_set_root() {
 
 #[test]
 fn should_create_derived() {
-    let provider_tree = ProviderTree::new(Some(&TestDependent {}));
+    let provider_tree = ProviderTree::new();
     let root_node = RootNode::new(&|| 25, &provider_tree, "Test Root");
     let read = || *root_node.get() * 2;
     let write = |v: i32| {
@@ -36,7 +39,7 @@ fn should_create_derived() {
 
 #[test]
 fn should_get_derived() {
-    let provider_tree = ProviderTree::new(Some(&TestDependent {}));
+    let provider_tree = ProviderTree::new();
     let root_node = RootNode::new(&|| 25, &provider_tree, "Test Root");
     let read = || *root_node.get() * 2;
     let write = |v: i32| {
@@ -52,7 +55,7 @@ fn should_get_derived() {
 
 #[test]
 fn should_update_derived_when_root_updates() {
-    let provider_tree = ProviderTree::new(Some(&TestDependent {}));
+    let provider_tree = ProviderTree::new();
     let root_node = RootNode::new(&|| 25, &provider_tree, "Test Root");
 
     let read = || *root_node.get() * 2;
@@ -68,7 +71,7 @@ fn should_update_derived_when_root_updates() {
 
 #[test]
 fn should_get_derived_chain() {
-    let tree = ProviderTree::new(Some(&TestDependent {}));
+    let tree = ProviderTree::new();
     let root = RootNode::new(&|| 25, &tree, "Test Root");
 
     let read1 = || *root.get() * 2;
@@ -84,7 +87,7 @@ fn should_get_derived_chain() {
 
 #[test]
 fn should_propagate_from_root_to_chained_derived() {
-    let tree = ProviderTree::new(Some(&TestDependent {}));
+    let tree = ProviderTree::new();
     let root = RootNode::new(&|| 25, &tree, "Test Root");
 
     let read1 = || *root.get() * 2;
@@ -102,7 +105,7 @@ fn should_propagate_from_root_to_chained_derived() {
 
 #[test]
 fn should_propagate_changes_to_chained_derived() {
-    let tree = ProviderTree::new(Some(&TestDependent {}));
+    let tree = ProviderTree::new();
     let root = RootNode::new(&|| 25, &tree, "Test Root");
 
     let read1 = || *root.get() * 2;
@@ -119,7 +122,7 @@ fn should_propagate_changes_to_chained_derived() {
 
 #[test]
 fn should_set_initialized_root_from_derived() {
-    let tree = ProviderTree::new(Some(&TestDependent {}));
+    let tree = ProviderTree::new();
     let root = RootNode::new(&|| 25, &tree, "Test Root");
 
     let read1 = || *root.get() * 2;

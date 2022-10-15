@@ -5,14 +5,14 @@ use std::rc::Rc;
 use crate::common::TestDependent;
 use heartwood::{
     common::{Read, Write},
-    derived::DerivedNode,
-    provider::{ProviderNode, ProviderTree, Scope, GLOBAL_SCOPE},
-    root::*,
 };
+use heartwood::v2::derived::DerivedNode;
+use heartwood::v2::provider_tree::{GLOBAL_SCOPE, ProviderNode, ProviderTree, Scope};
+use heartwood::v2::root::RootNode;
 
 #[test]
 fn should_get_and_set_root_in_scoped_provider() {
-    let tree = ProviderTree::new(Some(&TestDependent {}));
+    let tree = ProviderTree::new();
     let root = RootNode::new(&|| 25, &tree, "Test Root");
 
     const LOCAL_SCOPE: Scope = Scope::new("Root Scoped Local Scope");
@@ -34,7 +34,7 @@ fn should_get_and_set_root_in_scoped_provider() {
 
 #[test]
 fn should_get_and_set_derived_in_scoped_provider() {
-    let tree = ProviderTree::new(Some(&TestDependent {}));
+    let tree = ProviderTree::new();
     let root = RootNode::new(&|| 25, &tree, "Test Root");
     const LOCAL_SCOPE: Scope = Scope::new("Derived Scoped Local Scope");
     let node = ProviderNode {
@@ -61,7 +61,7 @@ fn should_get_and_set_derived_in_scoped_provider() {
 #[test]
 #[should_panic]
 fn should_panic_when_trying_to_access_scope_that_is_not_parent() {
-    let tree = ProviderTree::new(Some(&TestDependent {}));
+    let tree = ProviderTree::new();
     let root = RootNode::new(&|| 25, &tree, "Test Root");
 
     const LOCAL_SCOPE: Scope = Scope::new("Root Scoped Local Scope");
