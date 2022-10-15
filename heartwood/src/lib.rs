@@ -1,4 +1,3 @@
-pub mod accessor;
 pub mod common;
 pub mod provider;
 
