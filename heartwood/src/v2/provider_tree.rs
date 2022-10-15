@@ -5,10 +5,10 @@ pub struct Scope();
 pub const GLOBAL_SCOPE: Scope = Scope();
 
 pub struct ProviderTree {
-    root: ProviderNode<'static>,
-    dependent_stack: ProviderStack<&'static dyn Dependent>,
-    scope_stack: ProviderStack<&'static Scope>,
-    node_stack: ProviderStack<&'static ProviderNode<'static>>,
+    pub root: ProviderNode<'static>,
+    pub dependent_stack: ProviderStack<&'static dyn Dependent>,
+    pub scope_stack: ProviderStack<&'static Scope>,
+    pub node_stack: ProviderStack<&'static ProviderNode<'static>>,
 }
 
 impl ProviderTree {

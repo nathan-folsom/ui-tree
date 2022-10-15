@@ -16,10 +16,7 @@ fn should_get_and_set_root_in_scoped_provider() {
     let root = RootNode::new(&|| 25, &tree, "Test Root");
 
     const LOCAL_SCOPE: Scope = Scope::new("Root Scoped Local Scope");
-    let node = ProviderNode {
-        scope: &LOCAL_SCOPE,
-        parent: Some(tree.root.clone()),
-    };
+    let node = ProviderNode::new(&LOCAL_SCOPE, Some(&tree.root));
     tree.set_current(Rc::new(node));
 
     root.setp(30, &GLOBAL_SCOPE);
@@ -37,10 +34,7 @@ fn should_get_and_set_derived_in_scoped_provider() {
     let tree = ProviderTree::new();
     let root = RootNode::new(&|| 25, &tree, "Test Root");
     const LOCAL_SCOPE: Scope = Scope::new("Derived Scoped Local Scope");
-    let node = ProviderNode {
-        scope: &LOCAL_SCOPE,
-        parent: Some(tree.root.clone()),
-    };
+    let node = ProviderNode::new(&LOCAL_SCOPE, Some(&tree.root));
     tree.set_current(Rc::new(node));
 
     let read = || *root.get();
