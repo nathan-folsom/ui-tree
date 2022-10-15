@@ -5,16 +5,16 @@ pub struct Scope();
 pub const GLOBAL_SCOPE: Scope = Scope();
 
 pub struct ProviderTree {
-    root: ProviderNode,
+    root: ProviderNode<'static>,
     dependent_stack: ProviderStack<&'static dyn Dependent>,
     scope_stack: ProviderStack<&'static Scope>,
-    node_stack: ProviderStack<&'static ProviderNode>,
+    node_stack: ProviderStack<&'static ProviderNode<'static>>,
 }
 
 impl ProviderTree {
     pub const fn new() -> Self {
         Self {
-            root: ProviderNode::new(GLOBAL_SCOPE),
+            root: ProviderNode::new(&GLOBAL_SCOPE, None),
             dependent_stack: ProviderStack::new(),
             scope_stack: ProviderStack::new(),
             node_stack: ProviderStack::new(),
@@ -34,14 +34,18 @@ impl<T> ProviderStack<T> {
     }
 }
 
-pub struct ProviderNode {
-    scope: Scope,
+pub struct ProviderNode<'a> {
+    scope: &'static Scope,
+    parent: Option<&'a ProviderNode<'a>>,
+    children: Vec<ProviderNode<'a>>,
 }
 
-impl ProviderNode {
-    pub const fn new(scope: Scope) -> Self {
+impl<'a> ProviderNode<'a> {
+    pub const fn new(scope: &Scope, parent: Option<&'a ProviderNode<'a>>) -> Self {
         Self {
             scope,
+            parent,
+            children: Vec::new(),
         }
     }
 }
