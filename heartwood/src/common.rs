@@ -8,9 +8,9 @@ pub trait Dependent: Display {
     fn nudge(&self);
 }
 
-pub trait Read<'a, T> {
-    fn get(&'a self) -> Rc<T>;
-    fn getp(&'a self, scope: &'static Scope) -> Rc<T>;
+pub trait Read<T> {
+    fn get(&self) -> Rc<T>;
+    fn getp(&self, scope: &'static Scope) -> Rc<T>;
 }
 
 pub trait Write<T> {
