@@ -4,7 +4,7 @@ use std::{cell::RefCell, rc::Rc};
 
 use crate::common::TestDependent;
 use heartwood::{
-    accessor::Accessor,
+    v2::accessor::Accessor,
     common::{Read, Write},
 };
 use heartwood::v2::derived::DerivedNode;
