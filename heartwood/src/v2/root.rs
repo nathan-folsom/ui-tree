@@ -52,8 +52,6 @@ impl<T: 'static> Read<T> for RootNode<T> {
 
         self.provider_tree.scope_stack.act(scope, get_value);
 
-        if value { }
-
         value
     }
 
