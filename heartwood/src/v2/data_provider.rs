@@ -22,10 +22,10 @@ impl<T> DataProvider<T> {
     const EXPECT_INIT: &'static str = "Values map should be initialized";
 
     pub fn get_value(&self, provider: &ProviderNode) -> Rc<T> {
-        let initialized = { self.values.borrow().contains_key(provider) };
+        let initialized = { self.values.borrow().expect(DataProvider::EXPECT_INIT).contains_key(provider) };
 
         if initialized {
-            return Rc::clone(&self.values.borrow().get(provider).unwrap().current);
+            return Rc::clone(&self.values.borrow().expect(DataProvider::EXPECT_INIT).get(provider).unwrap().current);
         }
 
         {
@@ -34,7 +34,7 @@ impl<T> DataProvider<T> {
             let mut values = self.values.borrow_mut().expect(DataProvider::EXPECT_INIT);
             values.expect(DataProvider::EXPECT_INIT).insert(provider, new_value);
         }
-        return Rc::clone(&self.values.borrow().get(&provider.clone()).unwrap().current);
+        return Rc::clone(&self.values.borrow().expect(DataProvider::EXPECT_INIT).get(&provider.clone()).unwrap().current);
     }
 
     pub fn set_value(&self, provider: &ProviderNode, value: T) {
