@@ -23,9 +23,3 @@ pub struct ProvidedValue<T> {
     pub current: T,
     pub dependents: RefCell<Vec<&'static dyn Dependent>>,
 }
-
-#[test]
-fn should_construct_static() {
-    fn init() -> i32 { 25 }
-    const provider: DataProvider<i32> = DataProvider::new(&init);
-}

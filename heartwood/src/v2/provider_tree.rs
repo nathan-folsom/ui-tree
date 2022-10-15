@@ -51,8 +51,3 @@ pub trait Dependent {
 
     }
 }
-
-#[test]
-fn should_create_const_tree() {
-    const tree: ProviderTree = ProviderTree::new();
-}
